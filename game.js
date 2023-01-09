@@ -144,10 +144,12 @@ function restart() {
       return Math.random() * (max - min) + min;
     }
 
-    ballSpeedX = -30;
-    ballSpeedY = 20;
-    // ballSpeedX = generateRandomValueBetween(-40, 40);
-    // ballSpeedY = generateRandomValueBetween(-20, 20);
+    let negativeDirection = Math.random() < 0.5 ? false : true;
+    let randomXSpeed = generateRandomValueBetween(20, 40);
+    let randomYSpeed = generateRandomValueBetween(30, 40);
+
+    ballSpeedX = negativeDirection ? -1 * randomXSpeed : randomXSpeed;
+    ballSpeedY = negativeDirection ? -1 * randomYSpeed : randomYSpeed;
   }, 1000);
 }
 
@@ -170,8 +172,20 @@ function update() {
   let roundedBallPositionX = Math.round(ballPositionX);
   let roundedBallPositionY = Math.round(ballPositionY);
 
+  if (ballPositionY - batSizeY * 0.5 > bat2PositionY) {
+    bat2PositionY = bat2PositionY + batSpeedY * deltaTime;
+  } else if (ballPositionY - batSizeY * 0.5 < bat2PositionY) {
+    bat2PositionY = bat2PositionY - batSpeedY * deltaTime;
+  }
+
+  // bat2PositionY = roundedBallPositionY - batSizeY * 0.5;
+
   //check for ball colission with player 1
-  if (roundedBallPositionX === bat1PositionX) {
+  if (
+    roundedBallPositionX === bat1PositionX ||
+    (roundedBallPositionX >= bat1PositionX - 3 &&
+      roundedBallPositionX <= bat1PositionX)
+  ) {
     //check if the ballposition is the same as the players x position
     if (
       roundedBallPositionY >= bat1PositionY && //the rounded ballPosition is greater or equal to the position of the bat
@@ -179,12 +193,17 @@ function update() {
       //if both statements are true we are connecting vertically with the bat
     ) {
       //ball collided with player so we reverse it's xSpeed so we have a "bounce"
-      ballSpeedX = ballSpeedX * -1;
+      ballSpeedX = ballSpeedX * -1.1;
+      ballSpeedY = ballSpeedY * 1.1;
     }
   }
 
   //@TODO: check for ball colission with player 2
-  if (roundedBallPositionX === bat2PositionX) {
+  if (
+    roundedBallPositionX === bat2PositionX ||
+    (roundedBallPositionX <= bat2PositionX + 3 &&
+      roundedBallPositionX >= bat2PositionX)
+  ) {
     //check if the ball position is the same as the player's x position
     if (
       roundedBallPositionY >= bat2PositionY && //the rounded ball position is greater or equal to the position of the bat
@@ -192,7 +211,8 @@ function update() {
       //if both statements are true, we are connecting vertically with the bat
     ) {
       //ball collided with player so we reverse its x speed to create a "bounce" effect
-      ballSpeedX = ballSpeedX * -1;
+      ballSpeedX = ballSpeedX * -1.1;
+      ballSpeedY = ballSpeedY * 1.1;
     }
   }
 
@@ -202,7 +222,7 @@ function update() {
   }
 
   //check if the ball is passed the left boundary
-  if (roundedBallPositionX < 0 && !gameOver) {
+  if (roundedBallPositionX < -3 && !gameOver) {
     gameOver = true;
     lastWinner = "2";
     scoreRight++;
@@ -211,7 +231,7 @@ function update() {
 
   //@TODO: check if the ball is passed the right boundary
   // -> Restart the game if the boundaries are hit and update the scoreLeft or scoreRight
-  if (roundedBallPositionX > gridSizeX && !gameOver) {
+  if (roundedBallPositionX > gridSizeX + 3 && !gameOver) {
     gameOver = true;
     lastWinner = "1";
     scoreLeft++;
@@ -295,41 +315,3 @@ document.addEventListener("keyup", function (e) {
 //@TODO: add graphical enhancement to the game
 
 //@TODO: add an interesting mechanic to the game
-
-// variable to keep track of the ball's "charge"
-let ballCharge = 0;
-
-// variable to keep track of the paddle's "charge"
-let paddleCharge = 0;
-
-// function to update the ball's charge
-function updateBallCharge() {
-  // every time the ball hits a wall, increase its charge by 1
-  ballCharge++;
-}
-
-// function to update the paddle's charge
-function updatePaddleCharge() {
-  // every time the paddle hits the ball, increase its charge by 1
-  paddleCharge++;
-}
-
-// function to handle ball-paddle collisions
-function handleBallPaddleCollision() {
-  // if the ball's charge is greater than the paddle's charge,
-  // increase the ball's velocity (make it go faster)
-  if (ballCharge > paddleCharge) {
-    ball.velocity.x *= 1.1;
-    ball.velocity.y *= 1.1;
-  }
-  // if the paddle's charge is greater than the ball's charge,
-  // decrease the ball's velocity (make it go slower)
-  else if (paddleCharge > ballCharge) {
-    ball.velocity.x *= 0.9;
-    ball.velocity.y *= 0.9;
-  }
-
-  // reset the ball's and paddle's charge after the collision
-  ballCharge = 0;
-  paddleCharge = 0;
-}
